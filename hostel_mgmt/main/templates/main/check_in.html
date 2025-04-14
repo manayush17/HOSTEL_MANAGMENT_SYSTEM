@@ -1,113 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Check-in</title>
+    <title>Check In</title>
     <style>
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
             margin: 0;
-            padding: 0;
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
+            padding: 20px;
         }
 
-        .navbar {
-            background-color: #0057a3;
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .container {
-            width: 80%;
-            max-width: 600px;
-            margin: 50px auto;
-            background-color: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
+        h1 {
             text-align: center;
             color: #333;
         }
 
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
         p {
             font-size: 16px;
-            margin-bottom: 10px;
+            color: #444;
         }
 
         form {
             margin-top: 20px;
         }
 
+        label {
+            font-weight: 500;
+            display: block;
+            margin-bottom: 8px;
+        }
+
         input[type="text"] {
             width: 100%;
             padding: 10px;
-            margin-top: 5px;
-            border-radius: 5px;
+            margin-bottom: 15px;
             border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 14px;
         }
 
         button {
-            margin-top: 15px;
-            background-color: #0057a3;
+            background-color: #0052cc;
             color: white;
-            padding: 10px 18px;
             border: none;
-            border-radius: 5px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 15px;
             cursor: pointer;
-            font-weight: bold;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #003f7f;
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-top: 20px;
-            text-decoration: none;
-            color: #0057a3;
-            font-weight: bold;
+            background-color: #003d99;
         }
 
         .error {
             color: red;
-            font-weight: bold;
             margin-top: 10px;
+        }
+
+        .full {
+            color: red;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <div><strong>Check-in</strong></div>
-        <div>{{ user.username }}</div>
-    </div>
-
     <div class="container">
-        <h2>Confirm Your Booking</h2>
-
+        <h1>Room Details</h1>
         <p><strong>Room Number:</strong> {{ room.number }}</p>
-        <p><strong>User:</strong> {{ user.username }}</p>
-        <p><strong>Room Price:</strong> ₹{{ room.price }}</p>
+        <p><strong>Current Occupants:</strong> {{ current_capacity }} / 3</p>
+
+        {% if current_capacity >= 3 %}
+            <p class="full">This room is full and cannot be booked by any more students.</p>
+        {% else %}
+            <form method="POST">
+                {% csrf_token %}
+                <label for="transaction_id">Enter Transaction ID:</label>
+                <input type="text" name="transaction_id" required>
+                <button type="submit">Confirm Booking</button>
+            </form>
+        {% endif %}
 
         {% if error %}
             <p class="error">{{ error }}</p>
         {% endif %}
-
-        <form method="POST">
-            {% csrf_token %}
-            <label for="transaction_id">Enter Transaction ID:</label><br>
-            <input type="text" name="transaction_id" required><br>
-            <button type="submit">Confirm Booking</button>
-        </form>
-
-        <a href="{% url 'dashboard' %}" class="back-link">⬅ Back to Dashboard</a>
     </div>
 </body>
 </html>

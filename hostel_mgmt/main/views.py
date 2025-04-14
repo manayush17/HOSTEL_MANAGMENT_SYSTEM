@@ -97,7 +97,7 @@ def logout_view(request):
 @login_required
 def dashboard(request):
     if request.user.is_staff:
-        # Admin dashboard
+        # Admin dashboard: Show all bookings, allocated rooms, and free rooms
         bookings = Booking.objects.select_related('room', 'student')  # Fetch room and student info
         allocated_rooms = Room.objects.filter(is_available=False)
         free_rooms = Room.objects.filter(is_available=True)
@@ -110,50 +110,55 @@ def dashboard(request):
     else:
         # Student dashboard logic
         current_booking = Booking.objects.filter(student=request.user).select_related('room').first()
-        rooms = Room.objects.filter(is_available=True)
+
+        # Get available rooms with less than 3 students already booked
+        rooms = Room.objects.all()
+        available_rooms = []
+
+        for room in rooms:
+            # Count the number of bookings for the room
+            current_capacity = Booking.objects.filter(room=room).count()
+            if current_capacity < 3:
+                available_rooms.append(room)
+
         return render(request, 'main/student_dashboard.html', {
-            'rooms': rooms,
+            'rooms': available_rooms,
             'current_booking': current_booking
         })
-
 
 @csrf_protect
 @login_required
 def check_in(request, room_id):
-    # Prevent admins from booking rooms
     if request.user.is_staff:
         return HttpResponseForbidden("Admins cannot book rooms.")
 
-    # Fetch the room based on the room_id
-    room = get_object_or_404(Room, id=room_id, is_available=True)
+    room = get_object_or_404(Room, id=room_id)
 
-    if request.method == 'GET':
-        return render(request, 'main/check_in.html', {'room': room, 'user': request.user})
+    # Calculate the current capacity
+    current_capacity = room.current_capacity
 
     if request.method == 'POST':
         transaction_id = request.POST.get('transaction_id')
         if not transaction_id:
             return render(request, 'main/check_in.html', {
                 'room': room,
-                'user': request.user,
-                'error': 'Please enter a transaction ID.'
+                'error': 'Please enter a transaction ID.',
+                'current_capacity': current_capacity
             })
 
-        # Create booking record
-        Booking.objects.create(
-            student=request.user,
-            room=room,
-            transaction_id=transaction_id,
-            payment_status='paid',
-            checked_in=True,
-            checked_in_at=timezone.now()
-        )
+        # Try to allocate the room
+        if room.allocate_room(student=request.user, transaction_id=transaction_id):
+            return redirect('dashboard')
+        else:
+            return render(request, 'main/check_in.html', {
+                'room': room,
+                'error': 'This room is full. Cannot book anymore students.',
+                'current_capacity': current_capacity
+            })
 
-        # Mark room as unavailable
-        room.is_available = False
-        room.save()
+    # On GET request, display the room details
+    return render(request, 'main/check_in.html', {'room': room, 'current_capacity': current_capacity})
 
-        return redirect('dashboard')
 
 @login_required
 def check_out(request, booking_id):

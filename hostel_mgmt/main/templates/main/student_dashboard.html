@@ -93,7 +93,7 @@
             <ul>
                 <li>
                     <strong>Room:</strong> {{ current_booking.room.number }}<br>
-                    <strong>Price:</strong> ₹{{ current_booking.room.price }}<br>
+                    <strong>Price:</strong> ₹{{17000}}<br>
                     <strong>Transaction ID:</strong> {{ current_booking.transaction_id }}<br><br>
                     <form method="post" action="{% url 'check_out' current_booking.id %}">
                         {% csrf_token %}
@@ -109,7 +109,7 @@
                 {% for room in rooms %}
                     {% if room.id != current_booking.room.id %}
                         <li>
-                            Room {{ room.number }} – ₹{{ room.price }}
+                            Room {{ room.number }} – ₹{{ 17000 }}
                         </li>
                     {% endif %}
                 {% empty %}
@@ -121,7 +121,7 @@
             <ul>
                 {% for room in rooms %}
                     <li>
-                        Room {{ room.number }} – ₹{{ room.price }}<br><br>
+                        Room {{ room.number }} – ₹{{ 17000 }}<br><br>
                         <form method="get" action="{% url 'check_in' room.id %}">
                             <button type="submit">Check In</button>
                         </form>
