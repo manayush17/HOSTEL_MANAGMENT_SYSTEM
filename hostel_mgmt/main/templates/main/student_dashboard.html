@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ccffcc; /* Lime green background */
+        }
+
+        .navbar {
+            background-color: #0057a3;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar .welcome {
+            font-size: 18px;
+        }
+
+        .navbar .logout-btn {
+            background-color: #ffffff;
+            color: #0057a3;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px;
+            margin: 40px auto;
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h2, h3 {
+            color: #333;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        button {
+            background-color: #0057a3;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #003f7f;
+        }
+
+        hr {
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="welcome">Welcome, {{ request.user.username }}</div>
+        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+    </div>
+
+    <div class="container">
+        <h2>Student Dashboard</h2>
+
+        {% if current_booking %}
+            <h3>✅ Your Allocated Room</h3>
+            <ul>
+                <li>
+                    <strong>Room:</strong> {{ current_booking.room.number }}<br>
+                    <strong>Price:</strong> ₹{{ current_booking.room.price }}<br>
+                    <strong>Transaction ID:</strong> {{ current_booking.transaction_id }}<br><br>
+                    <form method="post" action="{% url 'check_out' current_booking.id %}">
+                        {% csrf_token %}
+                        <button type="submit">Check Out</button>
+                    </form>
+                </li>
+            </ul>
+
+            <hr>
+            <h3>Other Available Rooms</h3>
+            <p>You already have a room. You can’t book another.</p>
+            <ul>
+                {% for room in rooms %}
+                    {% if room.id != current_booking.room.id %}
+                        <li>
+                            Room {{ room.number }} – ₹{{ room.price }}
+                        </li>
+                    {% endif %}
+                {% empty %}
+                    <li>No other rooms available</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <h3>🟢 Available Rooms</h3>
+            <ul>
+                {% for room in rooms %}
+                    <li>
+                        Room {{ room.number }} – ₹{{ room.price }}<br><br>
+                        <form method="get" action="{% url 'check_in' room.id %}">
+                            <button type="submit">Check In</button>
+                        </form>
+                    </li>
+                {% empty %}
+                    <li>No rooms available right now</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</body>
+</html>

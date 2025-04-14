@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ccffcc;
+        }
+
+        .container {
+            width: 400px;
+            margin: 60px auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        form input[type="text"],
+        form input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0 16px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        form input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        label {
+            display: block;
+            margin-top: 8px;
+            color: #333;
+        }
+
+        #student-fields input {
+            margin-bottom: 12px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #0057a3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #004080;
+        }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #0057a3;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .error-messages {
+            color: red;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .success-message {
+            color: green;
+            text-align: center;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Register</h2>
+
+        {% if messages %}
+            <div>
+                {% for message in messages %}
+                    <p class="{% if message.tags == 'error' %}error-messages{% else %}success-message{% endif %}">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <label>Username:
+                <input type="text" name="username" required>
+            </label>
+            <label>Password:
+                <input type="password" name="password" required>
+            </label>
+
+            <label><input type="checkbox" name="is_student" id="is_student"> Register as Student</label>
+
+            <div id="student-fields" style="display: none;">
+                <label>Name:
+                    <input type="text" name="name">
+                </label>
+                <label>Department:
+                    <input type="text" name="department">
+                </label>
+                <label>Registration Number:
+                    <input type="text" name="reg_no">
+                </label>
+                <label>Roll Number:
+                    <input type="text" name="roll_no">
+                </label>
+                <label>Phone Number:
+                    <input type="text" name="phone_number">
+                </label>
+            </div>
+
+            <button type="submit">Register</button>
+        </form>
+        <a href="{% url 'login' %}">Already have an account? Login</a>
+    </div>
+
+    <script>
+        const isStudentCheckbox = document.getElementById('is_student');
+        const studentFields = document.getElementById('student-fields');
+        const studentInputs = studentFields.querySelectorAll('input');
+
+        function toggleStudentFields() {
+            if (isStudentCheckbox.checked) {
+                studentFields.style.display = 'block';
+                studentInputs.forEach(input => input.required = true);
+            } else {
+                studentFields.style.display = 'none';
+                studentInputs.forEach(input => input.required = false);
+            }
+        }
+
+        isStudentCheckbox.addEventListener('change', toggleStudentFields);
+        window.onload = toggleStudentFields;
+    </script>
+</body>
+</html>

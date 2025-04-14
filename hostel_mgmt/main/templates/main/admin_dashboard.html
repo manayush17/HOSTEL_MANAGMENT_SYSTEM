@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ccffcc; /* Lime green background */
+        }
+
+        .navbar {
+            background-color: #0057a3;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 1100px;
+            margin: 30px auto;
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #0057a3;
+            color: white;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+
+        button {
+            background-color: #0057a3;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #003f7f;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: #0057a3;
+            font-weight: bold;
+        }
+
+        .add-room-link {
+            display: inline-block;
+            margin-top: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 5px;
+        }
+
+        .add-room-link:hover {
+            background-color: #218838;
+        }
+
+        .logout-link {
+            color: red;
+            font-weight: bold;
+            margin-left: 20px;
+            text-decoration: none;
+        }
+
+        .logout-link:hover {
+            color: darkred;
+        }
+
+        .section-title {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div><strong>Admin Dashboard</strong></div>
+        <div><a href="{% url 'logout' %}" class="logout-link">Logout</a></div>
+    </div>
+
+    <div class="container">
+        <h2>Admin Dashboard</h2>
+
+        <div class="section-title">🔒 Allocated Rooms</div>
+        <table>
+            <tr>
+                <th>Student</th>
+                <th>Department</th>
+                <th>Reg No</th>
+                <th>Roll No</th>
+                <th>Phone Number</th>
+                <th>Room</th>
+                <th>Transaction ID</th>
+                <th>Payment</th>
+                <th>Checked In</th>
+                <th>Action</th>
+            </tr>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ booking.student.username }}</td>
+                <td>{{ booking.student.userprofile.department }}</td>
+                <td>{{ booking.student.userprofile.reg_no }}</td>
+                <td>{{ booking.student.userprofile.roll_no }}</td>
+                <td>{{ booking.student.userprofile.phone_number }}</td>
+                <td>{{ booking.room.number }}</td>
+                <td>{{ booking.transaction_id }}</td>
+                <td>{{ booking.payment_status }}</td>
+                <td>{{ booking.checked_in }}</td>
+                <td>
+                    <form method="post" action="{% url 'admin_deallocate' booking.id %}">
+                        {% csrf_token %}
+                        <button type="submit" onclick="return confirm('Deallocate this room?');">Deallocate</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="10">No current bookings.</td></tr>
+            {% endfor %}
+        </table>
+
+        <div class="section-title">🟢 Free Rooms</div>
+        <table>
+            <tr>
+                <th>Room Number</th>
+                <th>Price</th>
+            </tr>
+            {% for room in free_rooms %}
+            <tr>
+                <td>{{ room.number }}</td>
+                <td>₹{{ room.price }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2">No available rooms.</td></tr>
+            {% endfor %}
+        </table>
+
+        <div>
+            <a href="{% url 'add_room' %}" class="add-room-link">➕ Add New Room</a>
+        </div>
+    </div>
+</body>
+</html>
